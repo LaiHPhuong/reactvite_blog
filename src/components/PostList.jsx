@@ -100,6 +100,8 @@ export const PostList = ({ filter, value }) => {
 
         if (newUrl !== currentUrl) {
             navigate(newUrl, { replace: true });
+        } else {
+            navigate(currentUrl, { replace: true });
         }
     }, [searchParams]);
 
