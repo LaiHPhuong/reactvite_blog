@@ -84,15 +84,21 @@ export const PostList = ({ filter, value }) => {
 
     //resetSearch khi router thay đổi nếu không sẽ bị dính searchParams cũ trước đó
     useEffect(() => {
-        console.log(`current: `, prevPathname.current);
-        console.log(`pathname: `, pathname);
+        //console.log(`current: `, prevPathname.current);
+        //console.log(`pathname: `, pathname);
         if (prevPathname.current !== pathname) {
+            didInitRef.current = false;
             dispatch(resetSearch());
             prevPathname.current = pathname;
         }
     }, [pathname]);
 
     useEffect(() => {
+        if (!didInitRef.current) {
+            didInitRef.current = true;
+            return;
+        }
+        
         if (filter === 'user') {
             dispatch(getPostsByUserId({ value, searchParams }));
             document.title = 'Trang danh sách bài viết theo tác giả';
