@@ -88,7 +88,7 @@ export const PostList = ({ filter, value }) => {
         //console.log(`current: `, prevPathname.current);
         //console.log(`pathname: `, pathname);
         if (prevPathname.current !== pathname) {
-            isSearchReadyRef.current = false;
+            isSearchReadyRef.current = false; // chặn fetch kế tiếp
             dispatch(resetSearch());
             prevPathname.current = pathname;
         }
