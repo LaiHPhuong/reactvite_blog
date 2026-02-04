@@ -112,6 +112,8 @@ export const PostList = ({ filter, value }) => {
     }, [dispatch, searchParams]);
 
     useEffect(() => {
+        if (!didInitRef.current) return;
+        
         const queryString = buildQueryString(searchParams, defaultPostSearchParams);
 
         const newUrl = queryString ? `${location.pathname}?${queryString}` : location.pathname;
@@ -121,7 +123,7 @@ export const PostList = ({ filter, value }) => {
         if (newUrl !== currentUrl) {
             navigate(newUrl, { replace: true });
         }
-    }, [searchParams]);
+    }, [searchParams, pathname]);
 
     // console.log(listPost);
 
