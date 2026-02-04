@@ -11,7 +11,6 @@ import {
     selectorStatus,
     selectorSearchParams,
     setSearchParams,
-    resetSearch,
     defaultPostSearchParams,
     getPostsByUserId,
     getPostsByTag,
@@ -44,10 +43,7 @@ export const PostList = ({ filter, value }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const didInitRef = useRef(false);
-
-    const pathname = location.pathname;
-    const prevPathname = useRef(null);
-
+    
     const handleChangePage = (event, value) => {
         //console.log(event, value);
 
@@ -63,22 +59,25 @@ export const PostList = ({ filter, value }) => {
         });
     };
 
-    const scopeKey = filter ? `${filter}:${value}` : 'home';
+    if (!didInitRef.current) {
+        //Kiểm tra xem đã init chưa , false = lần render đầu tiên, true = đã init rồi → bỏ qua toàn bộ logic
 
-    useEffect(() => {
-        dispatch(resetSearch());
-    }, [scopeKey]);
+        didInitRef.current = true;
+        //	Đánh dấu đã init xong
+        //→ các render sau không chạy lại đoạn code này
+        //→ đảm bảo không dispatch nhiều lần
 
-    useEffect(() => {
-        if (!location.search) return;
+        if (location.search) {
+            const query = parseQueryString(location.search);
 
-        const query = parseQueryString(location.search);
+            if (Object.keys(query).length > 0) {
+                dispatch(setSearchParams(query));
 
-        if (Object.keys(query).length > 0) {
-            dispatch(setSearchParams(query));
+                //console.log(query);
+            }
         }
-    }, [scopeKey]);
-
+    }
+    
     useEffect(() => {
         if (filter === 'user') {
             dispatch(getPostsByUserId({ value, searchParams }));
@@ -90,7 +89,7 @@ export const PostList = ({ filter, value }) => {
             dispatch(getPosts(searchParams));
             document.title = 'Trang chủ';
         }
-    }, [scopeKey, searchParams]);
+    }, [dispatch, searchParams]);
 
     useEffect(() => {
         const queryString = buildQueryString(searchParams, defaultPostSearchParams);
@@ -101,8 +100,6 @@ export const PostList = ({ filter, value }) => {
 
         if (newUrl !== currentUrl) {
             navigate(newUrl, { replace: true });
-        } else {
-            navigate(currentUrl, { replace: true });
         }
     }, [searchParams]);
 
