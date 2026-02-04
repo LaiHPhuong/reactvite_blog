@@ -46,7 +46,7 @@ export const PostList = ({ filter, value }) => {
     const didInitRef = useRef(false);
     
     const pathname = location.pathname;
-    const prevPathname = useRef(null);
+    const prevPathname = useRef(pathname);
     const isSearchReadyRef = useRef(false);
 
     const handleChangePage = (event, value) => {
