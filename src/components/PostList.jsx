@@ -43,6 +43,9 @@ export const PostList = ({ filter, value }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const didInitRef = useRef(false);
+    
+    const pathname = location.pathname;
+    const prevPathname = useRef(null);
 
     const handleChangePage = (event, value) => {
         //console.log(event, value);
@@ -77,6 +80,14 @@ export const PostList = ({ filter, value }) => {
             }
         }
     }
+
+    //resetSearch khi router thay đổi nếu không sẽ bị dính searchParams cũ trước đó
+    useEffect(() => {
+        if (prevPathname.current !== pathname) {
+            dispatch(resetSearch());
+            prevPathname.current = pathname;
+        }
+    }, [pathname]);
 
     useEffect(() => {
         if (filter === 'user') {
