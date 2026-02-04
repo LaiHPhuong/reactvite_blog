@@ -47,6 +47,7 @@ export const PostList = ({ filter, value }) => {
     
     const pathname = location.pathname;
     const prevPathname = useRef(null);
+    const isSearchReadyRef = useRef(false);
 
     const handleChangePage = (event, value) => {
         //console.log(event, value);
@@ -87,15 +88,15 @@ export const PostList = ({ filter, value }) => {
         //console.log(`current: `, prevPathname.current);
         //console.log(`pathname: `, pathname);
         if (prevPathname.current !== pathname) {
-            didInitRef.current = false;
+            isSearchReadyRef.current = false;
             dispatch(resetSearch());
             prevPathname.current = pathname;
         }
     }, [pathname]);
 
     useEffect(() => {
-        if (!didInitRef.current) {
-            didInitRef.current = true;
+        if (!isSearchReadyRef.current) {
+            isSearchReadyRef.current = true;
             return;
         }
         
@@ -112,7 +113,7 @@ export const PostList = ({ filter, value }) => {
     }, [dispatch, searchParams]);
 
     useEffect(() => {
-        if (!didInitRef.current) return;
+        if (!isSearchReadyRef.current) return;
         
         const queryString = buildQueryString(searchParams, defaultPostSearchParams);
 
