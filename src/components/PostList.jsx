@@ -48,7 +48,8 @@ export const PostList = ({ filter, value }) => {
     const pathname = location.pathname;
     const prevPathname = useRef(pathname);
     const isSearchReadyRef = useRef(false);
-
+    const justResetRef = useRef(false);
+    
     const handleChangePage = (event, value) => {
         //console.log(event, value);
 
@@ -88,15 +89,15 @@ export const PostList = ({ filter, value }) => {
         //console.log(`current: `, prevPathname.current);
         //console.log(`pathname: `, pathname);
         if (prevPathname.current !== pathname) {
-            isSearchReadyRef.current = false; // chặn fetch kế tiếp
+            justResetRef.current = true;   // 🔥 đánh dấu vừa reset
             dispatch(resetSearch());
             prevPathname.current = pathname;
         }
     }, [pathname]);
 
     useEffect(() => {
-        if (!isSearchReadyRef.current) {
-            isSearchReadyRef.current = true;
+        if (justResetRef.current) {
+            justResetRef.current = false;
             return;
         }
         
