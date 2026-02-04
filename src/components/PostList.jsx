@@ -11,6 +11,7 @@ import {
     selectorStatus,
     selectorSearchParams,
     setSearchParams,
+    resetSearch,
     defaultPostSearchParams,
     getPostsByUserId,
     getPostsByTag,
@@ -83,6 +84,8 @@ export const PostList = ({ filter, value }) => {
 
     //resetSearch khi router thay đổi nếu không sẽ bị dính searchParams cũ trước đó
     useEffect(() => {
+        console.log(`current: `, prevPathname.current);
+        console.log(`pathname: `, pathname);
         if (prevPathname.current !== pathname) {
             dispatch(resetSearch());
             prevPathname.current = pathname;
