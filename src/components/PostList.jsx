@@ -121,7 +121,7 @@ export const PostList = ({ filter, value }) => {
         if (newUrl !== currentUrl) {
             navigate(newUrl, { replace: true });
         }
-    }, [searchParams,pathname]);
+    }, [searchParams]);
 
     // console.log(listPost);
 
