@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEnv } from '../utils/env';
 import {
@@ -11,6 +11,7 @@ import {
     selectorStatus,
     selectorSearchParams,
     setSearchParams,
+    resetSearch,
     defaultPostSearchParams,
     getPostsByUserId,
     getPostsByTag,
@@ -23,7 +24,7 @@ import { Error } from '../components/Error';
 import { parseQueryString, buildQueryString } from '../utils/convertQueryString';
 
 import { Alert, Box, Container, Divider, Grid, Pagination, Typography } from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
 export const PostList = ({ filter, value }) => {
     //console.log(import.meta.env.VITE_API_KEY);
@@ -42,8 +43,7 @@ export const PostList = ({ filter, value }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const didInitRef = useRef(false);
-    
+
     const handleChangePage = (event, value) => {
         //console.log(event, value);
 
@@ -59,26 +59,23 @@ export const PostList = ({ filter, value }) => {
         });
     };
 
-    if (!didInitRef.current) {
-        //Kiểm tra xem đã init chưa , false = lần render đầu tiên, true = đã init rồi → bỏ qua toàn bộ logic
-
-        didInitRef.current = true;
-        //	Đánh dấu đã init xong
-        //→ các render sau không chạy lại đoạn code này
-        //→ đảm bảo không dispatch nhiều lần
-
-        if (location.search) {
-            const query = parseQueryString(location.search);
-
-            if (Object.keys(query).length > 0) {
-                dispatch(setSearchParams(query));
-
-                //console.log(query);
-            }
-        }
-    }
-    
+    const navigationType = useNavigationType();
+    const currentContext = filter ? `${filter}:${value}` : 'default';
     useEffect(() => {
+        // Chỉ reset khi:
+        // - user navigate sang route khác
+        // - KHÔNG phải reload
+        if (navigationType === 'PUSH') {
+            dispatch(resetSearch({ _context: currentContext }));
+        }
+    }, [currentContext, navigationType]);
+
+    useEffect(() => {
+        // ⛔ Navigate route nhưng context chưa reset xong
+        if (navigationType === 'PUSH' && searchParams._context !== currentContext) {
+            return;
+        }
+
         if (filter === 'user') {
             dispatch(getPostsByUserId({ value, searchParams }));
             document.title = 'Trang danh sách bài viết theo tác giả';
@@ -89,7 +86,7 @@ export const PostList = ({ filter, value }) => {
             dispatch(getPosts(searchParams));
             document.title = 'Trang chủ';
         }
-    }, [dispatch, searchParams]);
+    }, [searchParams, currentContext]);
 
     useEffect(() => {
         const queryString = buildQueryString(searchParams, defaultPostSearchParams);
