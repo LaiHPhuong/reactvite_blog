@@ -67,6 +67,9 @@ export const buildQueryString = (params, defaultParams) => {
     const query = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
+        // ❌ bỏ _context khỏi URL
+        if (key === '_context') return;
+        
         // bỏ qua giá trị mặc định
         if (JSON.stringify(value) === JSON.stringify(defaultParams[key])) return;
         if (value == null || value === '') return;
