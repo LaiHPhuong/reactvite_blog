@@ -24,9 +24,10 @@ export const SearchForm = () => {
     };
 
     const handleClick = () => {
-        isUserTypingRef.current = true;
+        isUserTypingRef.current = false;
         dispatch(resetSearch());
         setKeyword('');
+        return;
     };
 
     const dispatch = useDispatch();
