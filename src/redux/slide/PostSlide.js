@@ -1,8 +1,30 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getEnv } from '../../utils/env';
 import axios from 'axios';
+import { parseQueryString } from '../../utils/convertQueryString';
+
+// merge vào defaultPostSearchParams ngay khi có location.search(queryString)
+const getInitialSearchParams = () => {
+    if (typeof window === 'undefined') return defaultPostSearchParams;
+
+    const { search } = window.location;
+    if (!search) return defaultPostSearchParams;
+
+    const query = parseQueryString(search);
+    if (!query || Object.keys(query).length === 0) {
+        return defaultPostSearchParams;
+    }
+
+    return {
+        ...defaultPostSearchParams,
+        ...query,
+        //skip: query.skip !== undefined ? Number(query.skip) : defaultPostSearchParams.skip,
+        //limit: query.limit !== undefined ? Number(query.limit) : defaultPostSearchParams.limit,
+    };
+};
 
 export const defaultPostSearchParams = {
+    _context: 'default',
     q: '',
     limit: getEnv('VITE_LIMIT'),
     skip: 0,
@@ -25,7 +47,7 @@ export const PostSlide = createSlice({
 
         status: 'idle',
 
-        searchParams: defaultPostSearchParams,
+        searchParams: getInitialSearchParams(),
     },
     reducers: {
         setSearchParams(state, action) {
@@ -35,8 +57,13 @@ export const PostSlide = createSlice({
             };
         },
 
-        resetSearch(state) {
-            state.searchParams = { ...defaultPostSearchParams };
+        resetSearch(state, action) {
+            const nextContext = action?.payload?._context ?? defaultPostSearchParams._context;
+
+            state.searchParams = {
+                ...defaultPostSearchParams,
+                _context: nextContext,
+            };
         },
     },
 
@@ -112,8 +139,9 @@ export const getPosts = createAsyncThunk(
         const hasSearch = searchParams.q.trim().length > 0;
         const endpoint = hasSearch ? 'posts/search' : 'posts';
 
+        const { _context, ...apiParams } = searchParams;
         const response = await axios.get(`${getEnv('VITE_SERVER_API')}/${endpoint}`, {
-            params: searchParams, // {} | { q } | { q, page, limit, sort }
+            params: apiParams, // {} | { q } | { q, page, limit, sort }
         });
 
         // dispatch(getPosts(selectorSearchParams));
@@ -159,8 +187,9 @@ export const getPost = createAsyncThunk('posts/getPost', async ({ id }, { reject
 export const getPostsByUserId = createAsyncThunk(
     'posts/getPostsByUser',
     async ({ value, searchParams }, { rejectWithValue }) => {
+        const { _context, ...apiParams } = searchParams;
         const response = await axios.get(`${getEnv('VITE_SERVER_API')}/users/${value}/posts`, {
-            params: searchParams,
+            params: apiParams,
         });
 
         if (response.status !== 200) {
@@ -177,8 +206,9 @@ export const getPostsByUserId = createAsyncThunk(
 export const getPostsByTag = createAsyncThunk(
     'posts/getPostsByTag',
     async ({ value, searchParams }, { rejectWithValue }) => {
+        const { _context, ...apiParams } = searchParams;
         const response = await axios.get(`${getEnv('VITE_SERVER_API')}/posts/tag/${value}`, {
-            params: searchParams,
+            params: apiParams,
         });
 
         if (response.status !== 200) {
